@@ -169,14 +169,11 @@ def checa_validade_do_range(input_list, reta_atual):
 # Isso resulta na representação visual das arestas do polígono na matriz, que pode ser usada para visualização ou processamento posterior.
 
 def produz_arestas(array_pontos, array_arestas, H, W, matrix, cor):
-    print(f"array pontos {array_pontos} array arestas {array_arestas} cor {cor}")  # Imprime os pontos, arestas e cor para depuração
     # Itera sobre cada aresta no array de arestas
     for aresta in array_arestas:
         primeiro_ponto, segundo_ponto = aresta  # Obtém os índices dos pontos que formam a aresta
         origem_x, origem_y = array_pontos[primeiro_ponto]  # Obtém as coordenadas do ponto inicial da aresta
         destino_x, destino_y = array_pontos[segundo_ponto]  # Obtém as coordenadas do ponto final da aresta
-
-        print(f"array_pontos[primeiro_ponto] {array_pontos[primeiro_ponto]} array_pontos[segundo_ponto] {array_pontos[segundo_ponto]}")  # Imprime as coordenadas dos pontos para depuração
 
         # Chama o algoritmo de rasterização para desenhar a linha (aresta) entre os dois pontos
         algoritmo_rasterizacao(origem_x, origem_y, destino_x, destino_y, H, W, matrix, cor)
@@ -411,7 +408,6 @@ def rasterizacao_poligonos():
         for poligono in lbllst:
             count += 1
             input_list = re.findall(r'-?\d+\.?\d*', poligono[1].get())
-            print("lista", input_list)
             if len(input_list) == 0:
                 tem_erro = True
                 messagebox.showerror(title='Erro', message=f"Não foi possível identificar coordenadas do polígono {count}!")
