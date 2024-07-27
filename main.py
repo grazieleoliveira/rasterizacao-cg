@@ -230,7 +230,7 @@ def rasterizacao_retas():
     # Além disso, também plota as retas contínuas em um gráfico para comparação visual.
     def desenha_reta(array_pontos):
         # Define uma lista de resoluções para as imagens a serem geradas
-        resolucoes = [[100, 100], [300, 300], [600, 600], [800, 600], [1920, 1080]]
+        resolucoes = [[100, 100], [300, 300], [800, 600], [1920, 1080]]
         # Gera uma lista de cores aleatórias para cada ponto
         cores = [[random.randint(0, 255) for _ in range(3)] for _ in range(len(array_pontos))]
         
@@ -379,7 +379,7 @@ def rasterizacao_poligonos():
 
     def desenha_poligonos(array_pontos):
         # Define as resoluções para a matriz de pixels
-        resolucoes = [[100, 100], [300, 300], [600, 600], [800, 600], [1920, 1080]]
+        resolucoes = [[100, 100], [300, 300], [800, 600], [1920, 1080]]
         # Gera cores aleatórias para cada polígono
         cores = [[random.randint(0, 255) for _ in range(3)] for _ in range(len(array_pontos))]
         
@@ -495,7 +495,7 @@ def rasterizacao_curvas():
     # Função para desenhar curvas usando Hermite
     def desenha_curvas(array_curvas):
         # Define as resoluções para a matriz de pixels
-        resolucoes = [[100, 100], [300, 300], [600, 600], [800, 600], [1920, 1080]]
+        resolucoes = [[100, 100], [300, 300], [800, 600], [1920, 1080]]
         
         # Itera sobre cada resolução definida
         for resolucao in resolucoes:
