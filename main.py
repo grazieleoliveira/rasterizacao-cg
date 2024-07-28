@@ -5,6 +5,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import random
 
+
+
 # Função para preencher a região interna do polígono
 # Funcionamento:
 # A função `preenche_regiao_interna` é responsável por preencher a região interna de um polígono em uma matriz com a cor especificada.
@@ -271,8 +273,7 @@ def rasterizacao_retas():
             
             # Verifica se a lista de coordenadas está vazia
             if len(input_list) == 0:
-                tem_erro = True  # Define a flag de erro como True
-                messagebox.showerror(title='Erro', message=f"Não foi possível identificar coordenadas na reta {count}!")  # Exibe uma mensagem de erro
+                continue
             # Verifica se a lista de coordenadas tem menos de 4 elementos
             elif len(input_list) < 4:
                 tem_erro = True  # Define a flag de erro como True
@@ -307,7 +308,10 @@ def rasterizacao_retas():
         # Valores de teste
         valores_padrao_retas = [
             "0 -0.5 0.5 0.5",
-            "0 0.3 0.8 0.8"
+            "0 0.3 0.8 0.8",
+            "0 0 0 1",
+            "0 0 1 0",
+            "0 0.4 0.6 0.8"
         ]
 
 
@@ -488,52 +492,49 @@ def rasterizacao_poligonos():
 
 # Função para rasterizar curvas
 def rasterizacao_curvas():
-    # Função para desenhar curvas usando Hermite
+# Função para rasterizar curvas
     def desenha_curvas(array_curvas):
-        # Define as resoluções para a matriz de pixels
-        resolucoes = [[100, 100], [300, 300], [800, 600], [1920, 1080]]
-        
-        # Itera sobre cada resolução definida
-        for resolucao in resolucoes:
-            # Cria uma matriz de pixels com a resolução especificada
-            matrix = np.zeros((resolucao[1], resolucao[0], 3), dtype=np.uint8)
-            
-            # Itera sobre cada curva definida em array_curvas
-            for curva in array_curvas:
-                P1, P2, T1, T2, cor = curva
-                # Desenha a curva na matriz usando a função de rasterização específica
-                desenha_curva_hermite(P1, P2, T1, T2, resolucao[0], resolucao[1], matrix, cor)
-            
-            # Exibe a matriz de pixels como uma imagem usando matplotlib
-            plt.subplot(2, 3, resolucoes.index(resolucao) + 1)
-            plt.imshow(matrix.astype("uint8"))
-            plt.gca().invert_yaxis()
-        
-        # Mostra todas as imagens em um grid de subplots
+        quantidades_pontos = [2, 5, 10, 20]  # Diferentes quantidades de pontos para mostrar a melhoria
+        num_curvas = len(array_curvas)
+        fig,axes = plt.subplots(num_curvas, len(quantidades_pontos), figsize=(60, 30))
+
+        for curva_idx, curva in enumerate(array_curvas):
+            p1, p2, t1, t2, cor = curva
+
+            for pontos_idx, num_pontos in enumerate(quantidades_pontos):
+                matrix = np.zeros((300, 400, 3), dtype=np.uint8)
+                curva_pontos = curva_hermite(p1, p2, t1, t2, num_pontos)
+
+                for i in range(len(curva_pontos) - 1):
+                    x1, y1 = curva_pontos[i]
+                    x2, y2 = curva_pontos[i + 1]
+                    algoritmo_rasterizacao(x1, y1, x2, y2, 300, 400, matrix, cor)
+
+                ax = axes[curva_idx, pontos_idx] if num_curvas > 1 else axes[pontos_idx]
+                ax.imshow(matrix.astype("uint8"))
+                ax.set_title(f'Curva {curva_idx + 1} - {num_pontos} pontos')
+                ax.invert_yaxis()
+                ax.axis('off')
         plt.show()
 
-    # Função para desenhar uma curva Hermite na matriz
-    def desenha_curva_hermite(P1, P2, T1, T2, W, H, matrix, cor):
-        # Gera 100 pontos igualmente espaçados entre 0 e 1
-        t = np.linspace(0, 1, num=100)
-        
-        # Calcula as funções base de Hermite
-        H0 = (2 * t**3 - 3 * t**2 + 1)  # Função base H0
-        H1 = (-2 * t**3 + 3 * t**2)     # Função base H1
-        H2 = (t**3 - 2 * t**2 + t)      # Função base H2
-        H3 = (t**3 - t**2)              # Função base H3
-        
-        # Calcula as coordenadas x e y da curva usando a fórmula de Hermite
-        x = H0 * P1[0] + H1 * P2[0] + H2 * T1[0] + H3 * T2[0]
-        y = H0 * P1[1] + H1 * P2[1] + H2 * T1[1] + H3 * T2[1]
-        
-        # Desenha a curva ponto a ponto
-        for i in range(len(x)):
-            # Converte as coordenadas (x[i], y[i]) para o sistema de coordenadas da matriz
-            x_norm, y_norm = nova_coord(x[i], y[i], W, H)
             
-            # Desenha o ponto na matriz na posição (x_norm, y_norm) com a cor especificada
-            produz_fragmento(x_norm, y_norm, matrix, cor)
+
+    # Função para produzir uma curva Hermite com base em quantidades diferentes de pontos
+    def curva_hermite(p1, p2, t1, t2, num_pontos):
+        t = np.linspace(0, 1, num_pontos)
+        h00 = 2*t**3 - 3*t**2 + 1
+        h10 = t**3 - 2*t**2 + t
+        h01 = -2*t**3 + 3*t**2
+        h11 = t**3 - t**2
+
+        return [
+            (
+                h00[i] * p1[0] + h10[i] * t1[0] + h01[i] * p2[0] + h11[i] * t2[0],
+                h00[i] * p1[1] + h10[i] * t1[1] + h01[i] * p2[1] + h11[i] * t2[1]
+            )
+            for i in range(num_pontos)
+        ]
+
 
     # Função para coletar as curvas da interface gráfica e validar as entradas
     def pegar_curvas():
@@ -569,10 +570,11 @@ def rasterizacao_curvas():
 
         # Valores padrão para curvas
         valores_padrao_curvas = [
-            "0 0 0.5 0 0 0.5 0.5 0",
-            "0 0 0.3 0.3 0.1 0.5 0.4 0.5"
-        ]
+            "0 0 0.5 0 0 0.5 0.5 0",       # Curva 1
+            "0.3 0.3 0.3 0.3 0.2 0.3 -0.2 -0.3", # Curva 2 (P1 e P2 iguais)
+            "0.3 0.3 0.3 0.3 1 0 0 1", # Curva 3 (P1 e P2 iguais)
 
+        ]
         panel1 = PanedWindow(curva_window, bd=4, relief='raised', orient='horizontal')
         panel1.pack(fill='both', expand=1)
 
